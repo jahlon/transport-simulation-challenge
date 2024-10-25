@@ -9,7 +9,7 @@ authors = ["jahlon <jahlon@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.10,!=3.12.1"
 
 [build-system]
 requires = ["poetry-core"]

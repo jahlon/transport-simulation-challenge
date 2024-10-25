@@ -3,24 +3,16 @@ from dataclasses import is_dataclass
 from inspect import signature, getmembers, isclass
 import app.model as model_module
 
+
 # Check if classes are defined in the module
-model_classes = dict(getmembers(model_module, isclass))
-has_bus = 'Bus' in model_classes
-has_transport_manager = 'TransportManager' in model_classes
+def has_class(module, class_name):
+    return class_name in [name for name, _ in getmembers(module, isclass)]
 
 
-if has_bus:
-    from app.model import Bus
-
-
-if has_transport_manager:
-    from app.model import TransportManager
-
-
-@unittest.skipUnless(has_bus, "La clase Bus no está definida.")
+@unittest.skipUnless(has_class(model_module, 'Bus'), "La clase Bus no está definida.")
 class TestBus(unittest.TestCase):
     def setUp(self):
-        self.bus = Bus(id=1, capacity=50)
+        self.bus = model_module.Bus(id=1, capacity=50)
         if self._testMethodDoc:
             self._testMethodDoc = self._testMethodDoc.strip()
 
@@ -36,8 +28,8 @@ class TestBus(unittest.TestCase):
         ]
         for var_name, var_type in class_variables:
             with self.subTest(var_name=var_name):
-                self.assertTrue(hasattr(Bus, var_name))
-                self.assertIsInstance(getattr(Bus, var_name), var_type)
+                self.assertTrue(hasattr(model_module.Bus, var_name))
+                self.assertIsInstance(getattr(model_module.Bus, var_name), var_type)
 
     def test_instance_attributes_exist(self):
         """Verifica que los atributos de instancia de la clase Bus existan."""
@@ -87,9 +79,9 @@ class TestBus(unittest.TestCase):
         initial_status = self.bus.status
         self.bus.toggle_status()
         self.assertNotEqual(self.bus.status, initial_status)
-        self.assertEqual(self.bus.status, Bus.STATUS_EN_RUTA)
+        self.assertEqual(self.bus.status, model_module.Bus.STATUS_EN_RUTA)
         self.bus.toggle_status()
-        self.assertEqual(self.bus.status, Bus.STATUS_EN_TERMINAL)
+        self.assertEqual(self.bus.status, model_module.Bus.STATUS_EN_TERMINAL)
 
     def test_update_location_valid_coordinates(self):
         """Verifica la actualización de la ubicación con coordenadas válidas en la clase Bus."""
@@ -113,10 +105,10 @@ class TestBus(unittest.TestCase):
                 self.assertEqual(distance, expected_distance)
 
 
-@unittest.skipUnless(has_transport_manager, "La clase TransportManager no está definida.")
+@unittest.skipUnless(has_class(model_module, "TransportManager"), "La clase TransportManager no está definida.")
 class TestTransportManager(unittest.TestCase):
     def setUp(self):
-        self.manager = TransportManager()
+        self.manager = model_module.TransportManager()
         self.bus_id = self.manager.add_bus(capacity=50)
         if self._testMethodDoc:
             self._testMethodDoc = self._testMethodDoc.strip()
@@ -153,10 +145,10 @@ class TestTransportManager(unittest.TestCase):
 
     def test_buses_by_status(self):
         """Verifica la obtención de buses por estado (en la terminal y en ruta) en la clase TransportManager."""
-        buses_at_terminal = self.manager.buses_by_status(Bus.STATUS_EN_TERMINAL)
+        buses_at_terminal = self.manager.buses_by_status(model_module.Bus.STATUS_EN_TERMINAL)
         self.assertEqual(len(buses_at_terminal), 1)
         self.manager.buses[self.bus_id].toggle_status()
-        buses_on_route = self.manager.buses_by_status(Bus.STATUS_EN_RUTA)
+        buses_on_route = self.manager.buses_by_status(model_module.Bus.STATUS_EN_RUTA)
         self.assertEqual(len(buses_on_route), 1)
 
     def test_buses_by_route_valid_routes(self):
