@@ -17,13 +17,15 @@ if has_transport_manager:
     from app.model import TransportManager
 
 
-@unittest.skipUnless(has_bus, "La clase Bus no está definida.")
 class TestBus(unittest.TestCase):
     def setUp(self):
-        self.bus = Bus(id=1, capacity=50)
+        if has_bus:
+            self.bus = Bus(id=1, capacity=50)
+
         if self._testMethodDoc:
             self._testMethodDoc = self._testMethodDoc.strip()
 
+    @unittest.skipUnless(has_bus, "La clase Bus no está definida.")
     def test_is_dataclass(self):
         """Verifica si Bus es una dataclass."""
         self.assertTrue(is_dataclass(self.bus))
@@ -36,6 +38,8 @@ class TestBus(unittest.TestCase):
         ]
         for var_name, var_type in class_variables:
             with self.subTest(var_name=var_name):
+                if not has_bus:
+                    self.fail("La clase Bus no está definida.")
                 self.assertTrue(hasattr(Bus, var_name))
                 self.assertIsInstance(getattr(Bus, var_name), var_type)
 
@@ -44,6 +48,8 @@ class TestBus(unittest.TestCase):
         instance_attributes = ['id', 'route', 'capacity', 'occupied_seats', 'status', 'location']
         for attr_name in instance_attributes:
             with self.subTest(attr_name=attr_name):
+                if not has_bus:
+                    self.fail("La clase Bus no está definida.")
                 self.assertTrue(hasattr(self.bus, attr_name))
 
     def test_methods_are_defined(self):
@@ -57,6 +63,8 @@ class TestBus(unittest.TestCase):
         ]
         for method_name, expected_signature in methods:
             with self.subTest(method_name=method_name):
+                if not has_bus:
+                    self.fail("La clase Bus no está definida.")
                 method = getattr(self.bus, method_name, None)
                 self.assertTrue(callable(method))
                 self.assertEqual(str(signature(method)), expected_signature)
@@ -66,6 +74,8 @@ class TestBus(unittest.TestCase):
         routes = ["Ruta A", "Ruta B", "Ruta C"]
         for route in routes:
             with self.subTest(route=route):
+                if not has_bus:
+                    self.fail("La clase Bus no está definida.")
                 self.bus.assign_route(route)
                 self.assertEqual(self.bus.route, route)
 
@@ -78,6 +88,8 @@ class TestBus(unittest.TestCase):
         ]
         for occupied_seats, expected_result in test_cases:
             with self.subTest(occupied_seats=occupied_seats):
+                if not has_bus:
+                    self.fail("La clase Bus no está definida.")
                 self.bus.occupied_seats = 0  # Reiniciar el valor antes de cada subtest
                 self.bus.update_occupied_seats(occupied_seats)
                 self.assertEqual(self.bus.occupied_seats, expected_result)
@@ -96,6 +108,8 @@ class TestBus(unittest.TestCase):
         locations = [(10, 20), (15, 30), (0, 0)]
         for new_x, new_y in locations:
             with self.subTest(new_x=new_x, new_y=new_y):
+                if not has_bus:
+                    self.fail("La clase Bus no está definida.")
                 self.bus.update_location(new_x, new_y)
                 self.assertEqual(self.bus.location, (new_x, new_y))
 
@@ -108,16 +122,20 @@ class TestBus(unittest.TestCase):
         ]
         for start_location, destination, expected_distance in test_cases:
             with self.subTest(start_location=start_location, destination=destination):
+                if not has_bus:
+                    self.fail("La clase Bus no está definida.")
                 self.bus.update_location(*start_location)
                 distance = self.bus.calculate_distance(*destination)
                 self.assertEqual(distance, expected_distance)
 
 
-@unittest.skipUnless(has_transport_manager, "La clase TransportManager no está definida.")
 class TestTransportManager(unittest.TestCase):
+
     def setUp(self):
-        self.manager = TransportManager()
-        self.bus_id = self.manager.add_bus(capacity=50)
+        if has_transport_manager:
+            self.manager = TransportManager()
+            self.bus_id = self.manager.add_bus(capacity=50)
+
         if self._testMethodDoc:
             self._testMethodDoc = self._testMethodDoc.strip()
 
@@ -134,10 +152,13 @@ class TestTransportManager(unittest.TestCase):
         ]
         for method_name, expected_signature in methods:
             with self.subTest(method_name=method_name):
+                if not has_transport_manager:
+                    self.fail("La clase TransportManager no está definida.")
                 method = getattr(self.manager, method_name, None)
                 self.assertTrue(callable(method))
                 self.assertEqual(str(signature(method)), expected_signature)
 
+    @unittest.skipUnless(has_transport_manager, "La clase TransportManager no está definida.")
     def test_add_bus_valid_capacity(self):
         """Verifica la adición de un bus con una capacidad válida en la clase TransportManager."""
         self.assertEqual(len(self.manager.buses), 1)
@@ -148,9 +169,12 @@ class TestTransportManager(unittest.TestCase):
         routes = ["Ruta B", "Ruta D", "Ruta E"]
         for route in routes:
             with self.subTest(route=route):
+                if not has_transport_manager:
+                    self.fail("La clase TransportManager no está definida.")
                 self.manager.assign_route(self.bus_id, route)
                 self.assertEqual(self.manager.buses[self.bus_id].route, route)
 
+    @unittest.skipUnless(has_transport_manager, "La clase TransportManager no está definida.")
     def test_buses_by_status(self):
         """Verifica la obtención de buses por estado (en la terminal y en ruta) en la clase TransportManager."""
         buses_at_terminal = self.manager.buses_by_status(Bus.STATUS_EN_TERMINAL)
@@ -164,6 +188,8 @@ class TestTransportManager(unittest.TestCase):
         routes = ["Ruta C", "Ruta F"]
         for route in routes:
             with self.subTest(route=route):
+                if not has_transport_manager:
+                    self.fail("La clase TransportManager no está definida.")
                 self.manager.assign_route(self.bus_id, route)
                 buses_on_route = self.manager.buses_by_route(route)
                 self.assertEqual(len(buses_on_route), 1)
@@ -174,6 +200,8 @@ class TestTransportManager(unittest.TestCase):
         locations = [(15, 25), (0, 0), (10, 10)]
         for new_x, new_y in locations:
             with self.subTest(new_x=new_x, new_y=new_y):
+                if not has_transport_manager:
+                    self.fail("La clase TransportManager no está definida.")
                 self.manager.update_bus_location(self.bus_id, new_x, new_y)
                 self.assertEqual(self.manager.buses[self.bus_id].location, (new_x, new_y))
 
@@ -186,10 +214,13 @@ class TestTransportManager(unittest.TestCase):
         ]
         for start_location, destination, expected_distance in test_cases:
             with self.subTest(start_location=start_location, destination=destination):
+                if not has_transport_manager:
+                    self.fail("La clase TransportManager no está definida.")
                 self.manager.update_bus_location(self.bus_id, *start_location)
                 distance = self.manager.calculate_distance_to_destination(self.bus_id, *destination)
                 self.assertEqual(distance, expected_distance)
 
+    @unittest.skipUnless(has_transport_manager, "La clase TransportManager no está definida.")
     def test_summary(self):
         """Verifica el resumen del estado de los buses (en ruta y en la terminal) en la clase TransportManager."""
         summary = self.manager.summary()
