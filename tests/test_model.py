@@ -86,6 +86,7 @@ class TestBus(unittest.TestCase):
                 self.bus.update_occupied_seats(occupied_seats)
                 self.assertEqual(self.bus.occupied_seats, expected_result)
 
+    @unittest.skipUnless(has_class(model_module, 'Bus'), "La clase Bus no está definida.")
     def test_toggle_status(self):
         """Verifica el cambio de estado del bus entre 'en ruta' y 'en la terminal' en la clase Bus."""
         initial_status = self.bus.status
